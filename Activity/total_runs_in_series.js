@@ -83,11 +83,33 @@ function handleMatch(html){
     for(let i=0; i<innings.length; i++){
         let teamName = $(innings[i]).find("h5").text().split(" Innings")[0];
 
-        // console.log();
+        console.log();
         if(teamName.length <= 5)
             console.log(teamName + "\t\t\t" + format);
         else
             console.log(teamName + "\t\t" + format);
+
+        console.log();
+        let battingTable = $(innings[i]).find("table.batsman");
+        let players = battingTable.find("tbody tr");
+
+        for(let i=0; i<players.length; i++){
+            let name = $(players[i]).find(".batsman-cell.text-truncate").text();
+            let runs = $(players[i]).find(".font-weight-bold").text();
+
+            if(name.length != 0){
+                if(name.length <= 6){
+                    console.log(name + "\t\t\t\t\t\t\t\t" + teamName + "\t\t" + format);
+                }
+                if(name.length>=14){
+                    console.log(name + "\t\t\t" + teamName + "\t\t" + format);
+                }
+                else{
+                    console.log(name + "\t\t\t\t" + teamName + "\t\t" + format);
+                }
+            }
+        }
+        console.log("###########################");
     }
 
 }
