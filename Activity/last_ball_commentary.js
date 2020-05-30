@@ -1,4 +1,4 @@
-// Last ball commentary
+// Last Ball Commentary
 
 let request = require('request');
 let fs = require('fs');
