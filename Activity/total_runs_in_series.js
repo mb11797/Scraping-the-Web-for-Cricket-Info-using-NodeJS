@@ -5,6 +5,7 @@ let fs = require('fs');
 let cheerio = require('cheerio');
 
 let count = 0;
+let leaderBoard = [];
 
 console.log("Sending Request");
 
@@ -55,6 +56,22 @@ function processRequest(completeLink){
         if(err == null && res.statusCode == 200){
             handleMatch(html);
             count--;
+
+            function kaunBadhaKaunChhota(a, b){
+                if(a.Runs > b.Runs)
+                    return -1;                  // a has higher priority => sort a to an index lower than b (i.e, a comes first)
+                else if(a.Runs < b.Runs)
+                    return +1;                  // b has higher priority => sort b to an index lower than a (i.e, b comes first)
+                else
+                    return 0;                   // Both have same priority. Leave a and b unchanged with respect to each other, but sorted with respect to all different elements
+            }
+
+            let sortedLeaderBoardArray = leaderBoard.sort(kaunBadhaKaunChhota);
+
+            // if all matches have been processed, then print the table
+            if(count == 0)
+                console.table(sortedLeaderBoardArray);
+
         }
         else if(res.statusCode == 404){
             console.log("Invalid URL. Page not found.");
@@ -99,17 +116,38 @@ function handleMatch(html){
 
             if(name.length != 0){
                 if(name.length <= 6){
-                    console.log(name + "\t\t\t\t\t\t\t\t" + teamName + "\t\t" + format);
+                    console.log(name + "\t\t\t\t\t\t\t\t" + teamName + "\t\t" + format + "\t\t" + runs);
                 }
                 if(name.length>=14){
-                    console.log(name + "\t\t\t" + teamName + "\t\t" + format);
+                    console.log(name + "\t\t\t" + teamName + "\t\t" + format + "\t\t" + runs);
                 }
                 else{
-                    console.log(name + "\t\t\t\t" + teamName + "\t\t" + format);
+                    console.log(name + "\t\t\t\t" + teamName + "\t\t" + format + "\t\t" + runs);
                 }
+                handlePlayer(format, teamName, name, runs);
             }
         }
         console.log("###########################");
     }
+}
 
+function handlePlayer(format, teamName, name, runs){
+    runs = Number.parseInt(runs, 10);
+
+    for(let i=0; i<leaderBoard.length; i++){
+        if(leaderBoard[i].Name == name && leaderBoard[i].Format == format && leaderBoard[i].Team == teamName){
+            leaderBoard[i].Runs += runs;
+            return;
+        }
+    }
+
+    //player object to push in array
+    let po = {
+        Name: name,
+        Team: teamName,
+        Format: format,
+        Runs: runs
+    }
+    leaderBoard.push(po);
+    return;
 }
