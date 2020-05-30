@@ -5,7 +5,6 @@ let fs = require('fs');
 let cheerio = require('cheerio');
 
 let count = 0;
-let leaderBoard = [];
 
 console.log("Sending Request");
 
@@ -43,8 +42,52 @@ function parseHtml(html){
             let completeLink = "https://www.espncricinfo.com" + link;
 
             console.log(completeLink);
+
+            processRequest(completeLink);
         }
     }
     console.log();
     console.log("Number of T20I and ODI Matches in Series: " + count);
+}
+
+function processRequest(completeLink){
+    request(completeLink, function(err, res, html){
+        if(err == null && res.statusCode == 200){
+            handleMatch(html);
+            count--;
+        }
+        else if(res.statusCode == 404){
+            console.log("Invalid URL. Page not found.");
+        }
+        else{
+            console.log(err);
+            console.log(res.statusCode);
+        }
+    });
+}
+
+function handleMatch(html){
+    // Properties to extract from each Match => PlayerName, TeamName, MatchFormat, PlayerRuns
+    let $ = cheerio.load(html);
+    let text = $(".desc.text-truncate").text();
+    console.log("***********************************************");
+    console.log(text);
+
+    //zarori nahin hai ki harr baar sab same hi order me aayein - Reason is Async Programming
+    let format = text.includes("T20I") == true ? "T20I" : "ODI";
+    console.log("Format: " + format);
+    console.log();
+
+    let innings = $(".card.content-block.match-scorecard-table .Collapsible");
+
+    for(let i=0; i<innings.length; i++){
+        let teamName = $(innings[i]).find("h5").text().split(" Innings")[0];
+
+        // console.log();
+        if(teamName.length <= 5)
+            console.log(teamName + "\t\t\t" + format);
+        else
+            console.log(teamName + "\t\t" + format);
+    }
+
 }
